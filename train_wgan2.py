@@ -6,10 +6,8 @@ import torchvision.datasets as dset
 import torchvision.utils as vutils
 from torch.utils.data import DataLoader, Subset
 
-# 数据路径（你的CelebA解压路径）
 dataroot = r"C:\Users\10041\dcgan_celeba\img_align_celeba"
 
-# 参数设置
 batch_size = 64
 image_size = 64
 nz = 100
@@ -24,10 +22,8 @@ n_critic = 5
 num_epochs = 5
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# 创建输出文件夹
 os.makedirs("samples_wgan", exist_ok=True)
 
-# 图像变换
 transform = transforms.Compose([
     transforms.Resize(image_size),
     transforms.CenterCrop(image_size),
@@ -35,7 +31,6 @@ transform = transforms.Compose([
     transforms.Normalize((0.5,), (0.5,))
 ])
 
-# 加载 CelebA 的子集（前 5000 张）
 full_dataset = dset.ImageFolder(root=dataroot, transform=transform)
 subset_indices = list(range(5000))
 dataset = Subset(full_dataset, subset_indices)
@@ -87,14 +82,12 @@ class Discriminator(nn.Module):
     def forward(self, x):
         return self.main(x).view(-1)
 
-# 初始化模型与优化器
 netG = Generator().to(device)
 netD = Discriminator().to(device)
 fixed_noise = torch.randn(64, nz, 1, 1, device=device)
 optimizerD = torch.optim.Adam(netD.parameters(), lr=lr, betas=(beta1, beta2))
 optimizerG = torch.optim.Adam(netG.parameters(), lr=lr, betas=(beta1, beta2))
 
-# 梯度惩罚
 def compute_gp(D, real, fake):
     epsilon = torch.rand(real.size(0), 1, 1, 1, device=device)
     x_hat = epsilon * real + (1 - epsilon) * fake
@@ -125,7 +118,6 @@ for epoch in range(num_epochs):
             loss_D.backward()
             optimizerD.step()
 
-        # 训练 G
         netG.zero_grad()
         z = torch.randn(b_size, nz, 1, 1, device=device)
         fake = netG(z)
@@ -133,12 +125,11 @@ for epoch in range(num_epochs):
         loss_G.backward()
         optimizerG.step()
 
-        if i % 200 == 0:  # 每200个batch打印一次
+        if i % 200 == 0:
             print(f"[{epoch}/{num_epochs}][{i}/{len(dataloader)}] "
                   f"Loss_D: {loss_D.item():.4f} "
                   f"Loss_G: {loss_G.item():.4f}")
 
-    # 每轮结束保存生成图
     with torch.no_grad():
         fake = netG(fixed_noise).detach().cpu()
         vutils.save_image(fake, f"samples_wgan2/fake_epoch_{epoch+1}.png", normalize=True)
