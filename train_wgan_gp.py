@@ -6,10 +6,8 @@ import torchvision.datasets as dset
 import torchvision.utils as vutils
 from torch.utils.data import DataLoader
 
-# 数据路径
 dataroot = r"C:\Users\10041\dcgan_celeba\img_align_celeba"
 
-# 参数
 batch_size = 64
 image_size = 64
 nz = 100
@@ -26,7 +24,6 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 os.makedirs("samples_wgan", exist_ok=True)
 
-# 数据加载
 transform = transforms.Compose([
     transforms.Resize(image_size),
     transforms.CenterCrop(image_size),
@@ -37,7 +34,6 @@ transform = transforms.Compose([
 dataset = dset.ImageFolder(root=dataroot, transform=transform)
 dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=0)
 
-# 模型
 class Generator(nn.Module):
     def __init__(self):
         super().__init__()
@@ -82,7 +78,6 @@ class Discriminator(nn.Module):
     def forward(self, x):
         return self.main(x).view(-1)
 
-# 模型初始化
 netG = Generator().to(device)
 netD = Discriminator().to(device)
 fixed_noise = torch.randn(64, nz, 1, 1, device=device)
@@ -107,7 +102,6 @@ for epoch in range(num_epochs):
         real = real.to(device)
         b_size = real.size(0)
 
-        # 训练 Discriminator
         for _ in range(n_critic):
             netD.zero_grad()
             z = torch.randn(b_size, nz, 1, 1, device=device)
@@ -119,7 +113,6 @@ for epoch in range(num_epochs):
             loss_D.backward()
             optimizerD.step()
 
-        # 训练 Generator
         netG.zero_grad()
         z = torch.randn(b_size, nz, 1, 1, device=device)
         fake = netG(z)
@@ -132,7 +125,6 @@ for epoch in range(num_epochs):
                   f"Loss_D: {loss_D.item():.4f} "
                   f"Loss_G: {loss_G.item():.4f}")
 
-    # 保存结果
     with torch.no_grad():
         fake = netG(fixed_noise).detach().cpu()
         vutils.save_image(fake, f"samples_wgan/fake_epoch_{epoch+1}.png", normalize=True)
