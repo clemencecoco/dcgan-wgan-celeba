@@ -7,32 +7,27 @@ import torchvision.utils as vutils
 from torch.utils.data import DataLoader
 from datetime import datetime
 
-# 设置随机种子
 manualSeed = 999
 torch.manual_seed(manualSeed)
 
-# 参数设置
 dataroot = "./img_align_celeba_subset"
 
 
 workers = 2
 batch_size = 64
 image_size = 64
-nc = 3           # 通道数（彩色图片）
-nz = 100         # latent vector z 的长度
-ngf = 64         # 生成器 feature map 数量
-ndf = 64         # 判别器 feature map 数量
+nc = 3        
+nz = 100        
+ngf = 64     
+ndf = 64       
 num_epochs = 3
 lr = 0.0002
 beta1 = 0.5
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# 创建输出文件夹
 os.makedirs("samples", exist_ok=True)
 os.makedirs("checkpoints", exist_ok=True)
 
-# 数据增强和加载
-# 数据增强和加载
 dataset = dset.ImageFolder(
     root=dataroot,
     transform=transforms.Compose([
@@ -46,7 +41,6 @@ dataset = dset.ImageFolder(
 dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=0)
 
 
-# 定义 Generator
 class Generator(nn.Module):
     def __init__(self):
         super(Generator, self).__init__()
@@ -74,7 +68,6 @@ class Generator(nn.Module):
     def forward(self, input):
         return self.main(input)
 
-# 定义 Discriminator
 class Discriminator(nn.Module):
     def __init__(self):
         super(Discriminator, self).__init__()
@@ -101,15 +94,12 @@ class Discriminator(nn.Module):
     def forward(self, input):
         return self.main(input)
 
-# 初始化模型
 netG = Generator().to(device)
 netD = Discriminator().to(device)
 
-# 损失函数
 criterion = nn.BCELoss()
 fixed_noise = torch.randn(64, nz, 1, 1, device=device)
 
-# 优化器
 optimizerD = torch.optim.Adam(netD.parameters(), lr=lr, betas=(beta1, 0.999))
 optimizerG = torch.optim.Adam(netG.parameters(), lr=lr, betas=(beta1, 0.999))
 
@@ -118,7 +108,7 @@ if __name__ == '__main__':
     print("Starting Training Loop...")
     for epoch in range(num_epochs):
         for i, data in enumerate(dataloader, 0):
-            # 训练 Discriminator
+            
             netD.zero_grad()
             real_cpu = data[0].to(device)
             b_size = real_cpu.size(0)
@@ -138,7 +128,6 @@ if __name__ == '__main__':
             errD = errD_real + errD_fake
             optimizerD.step()
 
-            # 训练 Generator
             netG.zero_grad()
             label.fill_(1.0)
             output = netD(fake).view(-1)
@@ -147,7 +136,6 @@ if __name__ == '__main__':
             D_G_z2 = output.mean().item()
             optimizerG.step()
 
-            # 输出进度
             if i % 50 == 0:
                 print(f"[{epoch}/{num_epochs}][{i}/{len(dataloader)}] "
                       f"Loss_D: {errD.item():.4f} "
@@ -155,12 +143,10 @@ if __name__ == '__main__':
                       f"D(x): {D_x:.4f} "
                       f"D(G(z)): {D_G_z1:.4f}/{D_G_z2:.4f}")
 
-        # 每个epoch保存生成图
         with torch.no_grad():
             fake = netG(fixed_noise).detach().cpu()
         vutils.save_image(fake, f"samples1/fake_epoch_{epoch+1}.png", normalize=True)
 
-    # 保存模型
     torch.save(netG.state_dict(), "checkpoints/netG.pth")
     torch.save(netD.state_dict(), "checkpoints/netD.pth")
 
