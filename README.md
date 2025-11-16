@@ -62,7 +62,8 @@ Generated images and logs will be saved under `samples/`.
   * Produces more diverse and realistic faces
 
 Example results (DCGAN vs WGAN-GP):
-*(insert sample images and loss curves here)*
+<img width="1059" height="416" alt="image" src="https://github.com/user-attachments/assets/e5193e43-9a39-4ba0-9b53-2aabc1ec83b0" />
+
 
 ---
 
