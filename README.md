@@ -4,7 +4,10 @@
 
 This repository contains training scripts and experiments comparing **DCGAN** and **WGAN-GP** for image generation using the **CelebA dataset**.
 The goal is to evaluate training stability, output quality, and the effect of different hyperparameters on generative performance.
+Example results (DCGAN vs WGAN-GP):
+<img width="975" height="384" alt="Screenshot 2025-11-16 121107" src="https://github.com/user-attachments/assets/c9c68d4a-2d5b-4b54-839f-49a175e46a50" />
 
+<img width="1059" height="416" alt="image" src="https://github.com/user-attachments/assets/e5193e43-9a39-4ba0-9b53-2aabc1ec83b0" />
 ---
 
 ## Features
